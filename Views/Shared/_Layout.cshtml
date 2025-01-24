@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Kitap Köşesi</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B4513;  /* Kahverengi */
+            --primary-hover: #6b3410;  /* Koyu kahverengi (hover için) */
+            --secondary-color: #D2B48C;
+            --background-color: #FAF6F1;
+            --text-color: #5C4033;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 60px; /* footer yüksekliği kadar padding */
+        }
+
+        .navbar {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+            padding: 0;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+            margin-right: 15px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+        }
+
+        .nav-link.auth-link {
+            color: var(--primary-color) !important;
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link.auth-link:hover {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        .nav-link.auth-link.register {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        .nav-link.auth-link.register:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .footer {
+            background-color: var(--secondary-color);
+            padding: 1rem 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px; /* footer yüksekliği */
+        }
+
+        .footer-links {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .footer-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin: 0 1rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        .container {
+            margin-bottom: 2rem; /* container ile footer arasında boşluk */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <img src="~/images/logo.jpg" alt="Kitap Köşesi Logo" />
+                    Kitap Köşesi
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Kitap" asp-action="Index">Kitaplar</a>
+                        </li>
+                        @if (Context.Session.GetString("UserId") != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Kitap" asp-action="Favorilerim">Favorilerim</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Sepet" asp-action="Index">Sepetim</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Siparis" asp-action="Siparislerim">Siparişlerim</a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (Context.Session.GetString("IsLoggedIn") == "true")
+                        {
+                            <li class="nav-item">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-3">@Context.Session.GetString("UserEmail")</span>
+                                    <a href="#" onclick="cikisYap()" class="nav-link auth-link">Çıkış</a>
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link auth-link" asp-controller="Kullanici" asp-action="GirisYap">Giriş</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link auth-link register" asp-controller="Kullanici" asp-action="KayitOl">Kayıt Ol</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>&copy; @DateTime.Now.Year - Kitap Köşesi</div>
+                <div class="footer-links">
+                    <a href="/Home/Hakkimizda">Hakkımızda</a>
+                    <a href="/Home/Iletisim">İletişim</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function cikisYap() {
+            Swal.fire({
+                title: 'Çıkış Yap',
+                text: 'Çıkış yapmak istediğinize emin misiniz?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, Çıkış Yap',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Kullanici/Cikis', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Başarılı!',
+                                text: 'Çıkış yapıldı',
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.href = '/';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Hata!',
+                                text: 'Çıkış yapılırken bir hata oluştu',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

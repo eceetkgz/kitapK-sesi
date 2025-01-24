@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Sipariş Başarılı";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="card-title mb-3">Siparişiniz Başarıyla Alındı!</h2>
+                    <p class="card-text mb-4">
+                        Sipariş numaranız: <strong>@ViewBag.SiparisNo</strong>
+                        <br>
+                        Sipariş detaylarını "Siparişlerim" sayfasından takip edebilirsiniz.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="@Url.Action("Index", "Kitap")" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Alışverişe Devam Et
+                        </a>
+                        <a href="@Url.Action("Siparislerim", "Siparis")" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> Siparişlerim
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

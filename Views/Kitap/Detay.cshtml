@@ -1,0 +1,42 @@
+<div class="card-footer">
+    @if (Model.StokMiktari > 0)
+    {
+        @if (Context.Session.GetString("UserId") != null)
+        {
+            <form asp-action="Ekle" asp-controller="Sepet" method="post" class="d-inline">
+                <input type="hidden" name="kitapId" value="@Model.Id" />
+                <button class="sepete-ekle" data-kitap-id="123">🛒</button>
+
+            </form>
+        }
+        else
+        {
+            <a href="@Url.Action("GirisYap", "Kullanici")" class="btn btn-primary">
+                <i class="bi bi-cart-plus"></i> Sepete Eklemek için Giriş Yapın
+            </a>
+        }
+    }
+    else
+    {
+        <form asp-action="StokBildirimEkle" asp-controller="Kitap" method="post" class="d-inline">
+            <input type="hidden" name="kitapId" value="@Model.Id" />
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-bell"></i> Stok Bildirimi İste
+            </button>
+        </form>
+    }
+
+    @if (Context.Session.GetString("UserId") != null)
+    {
+        <form asp-action="FavorilereEkle" asp-controller="Kitap" method="post" class="d-inline ms-2">
+            <input type="hidden" name="kitapId" value="@Model.Id" />
+            <button class="favori-ekle" data-kitap-id="123">❤</button>
+        </form>
+    }
+    else
+    {
+        <a href="@Url.Action("GirisYap", "Kullanici")" class="btn btn-outline-danger ms-2">
+            <i class="bi bi-heart"></i> Favorilere Eklemek için Giriş Yapın
+        </a>
+    }
+</div>

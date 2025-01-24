@@ -1,0 +1,277 @@
+@model KitapKosesi.Models.SiparisModel
+
+@{
+    ViewData["Title"] = "Siparişi Tamamla";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Sipariş Bilgileri</h4>
+                    <form method="post" asp-controller="Siparis" asp-action="Tamamla">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ad</label>
+                                <input type="text" class="form-control" asp-for="Ad" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Soyad</label>
+                                <input type="text" class="form-control" asp-for="Soyad" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-control" asp-for="EPosta" value="@Context.Session.GetString("UserEmail")" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" class="form-control" asp-for="Telefon" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Adres</label>
+                            <textarea class="form-control" asp-for="Adres" rows="3" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">İl</label>
+                                <select class="form-select" asp-for="Il" id="il" required>
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">İlçe</label>
+                                <select class="form-select" asp-for="Ilce" id="ilce" required>
+                                    <option value="">Önce il seçiniz</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Ödeme Yöntemi</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="OdemeTipi" id="krediKarti" value="KrediKarti" checked>
+                                <label class="form-check-label" for="krediKarti">
+                                    Kredi Kartı
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="OdemeTipi" id="havale" value="Havale">
+                                <label class="form-check-label" for="havale">
+                                    Havale/EFT
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="krediKartiBilgileri">
+                            <div class="mb-3">
+                                <label class="form-label">Kart Üzerindeki İsim</label>
+                                <input type="text" class="form-control" asp-for="KartSahibiAdi">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kart Numarası</label>
+                                <input type="text" class="form-control" asp-for="KartNumara" placeholder="**** **** **** ****">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Son Kullanma Tarihi</label>
+                                    <input type="text" class="form-control" asp-for="KartSonKullanma" placeholder="AA/YY">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" class="form-control" asp-for="KartCVV" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" asp-for="SozlesmeKabul" required>
+                            <label class="form-check-label" for="SozlesmeKabul">
+                                Mesafeli satış sözleşmesini okudum ve kabul ediyorum
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" onclick="siparisiOnayla()">
+                            Siparişi Onayla
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Sipariş Özeti</h5>
+                    <hr>
+                    @foreach (var item in Model.SepetUrunleri)
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>@item.Kitap.Ad (@item.Adet adet)</span>
+                            <span>@((item.Kitap.Fiyat * item.Adet).ToString("N2")) ₺</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>Ara Toplam:</strong>
+                        <strong>@Model.AraToplam.ToString("N2") ₺</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Kargo:</span>
+                        <span>@Model.KargoUcreti.ToString("N2") ₺</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Toplam:</strong>
+                        <strong class="text-primary">@Model.ToplamTutar.ToString("N2") ₺</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // İl-İlçe verileri
+        const iller = {
+            "İstanbul": ["Kadıköy", "Beşiktaş", "Üsküdar"],
+            "Ankara": ["Çankaya", "Keçiören", "Mamak"],
+            "İzmir": ["Konak", "Karşıyaka", "Bornova"]
+            // Diğer iller ve ilçeler eklenebilir
+        };
+
+        // İl seçimi değiştiğinde ilçeleri güncelle
+        document.getElementById('il').addEventListener('change', function() {
+            const ilceSelect = document.getElementById('ilce');
+            ilceSelect.innerHTML = '<option value="">Seçiniz</option>';
+            
+            const secilenIl = this.value;
+            if (secilenIl && iller[secilenIl]) {
+                iller[secilenIl].forEach(ilce => {
+                    const option = document.createElement('option');
+                    option.value = ilce;
+                    option.textContent = ilce;
+                    ilceSelect.appendChild(option);
+                });
+            }
+        });
+
+        // İlleri doldur
+        const ilSelect = document.getElementById('il');
+        Object.keys(iller).forEach(il => {
+            const option = document.createElement('option');
+            option.value = il;
+            option.textContent = il;
+            ilSelect.appendChild(option);
+        });
+
+        // Kredi kartı bilgileri alanını göster/gizle
+        document.querySelectorAll('input[name="OdemeTipi"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const kartBilgileri = document.getElementById('krediKartiBilgileri');
+                kartBilgileri.style.display = this.value === 'KrediKarti' ? 'block' : 'none';
+            });
+        });
+
+        // Kart numarası formatla
+        document.querySelector('input[asp-for="KartNumara"]').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = value;
+        });
+
+        // SKT formatla
+        document.querySelector('input[asp-for="KartSKT"]').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0,2) + '/' + value.slice(2,4);
+            }
+            e.target.value = value;
+        });
+
+        function siparisiOnayla() {
+            event.preventDefault(); // Form submit işlemini engelle
+
+            // Form geçerliliğini kontrol et
+            var form = document.querySelector('form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            Swal.fire({
+                title: 'Siparişiniz Alınıyor...',
+                text: 'Lütfen bekleyiniz',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Form verilerini al ve JSON'a dönüştür
+            var formData = new FormData(form);
+            var object = {};
+            formData.forEach((value, key) => {
+                // Checkbox için özel kontrol
+                if (key === "SozlesmeKabul") {
+                    object[key] = value === "true" || value === "on";
+                } else {
+                    object[key] = value;
+                }
+            });
+
+            // Antiforgery token'ı ekle
+            object["__RequestVerificationToken"] = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // Siparişi gönder
+            fetch('/Siparis/Tamamla', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(object)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Siparişiniz Başarıyla Alındı!',
+                        text: 'Siparişiniz başarıyla oluşturuldu. Siparişlerim sayfasından takip edebilirsiniz.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Siparişlerime Git',
+                        cancelButtonText: 'Alışverişe Devam Et'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/Siparis/Siparislerim';
+                        } else {
+                            window.location.href = '/Kitap/Index';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: data.message || 'Bir hata oluştu'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: 'Bir hata oluştu'
+                });
+            });
+        }
+    </script>
+} 

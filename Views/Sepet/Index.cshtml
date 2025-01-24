@@ -1,0 +1,92 @@
+@model List<KitapKosesi.Models.SepetUrunu>
+
+@{
+    ViewData["Title"] = "Sepetim";
+}
+
+<div class="container mt-4">
+    <h2>Sepetim</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p>Sepetinizde ürün yok.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Kitap Adı</th>
+                    <th>Yazar</th>
+                    <th>Fiyat</th>
+                    <th>Adet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var urun in Model)
+                {
+                    <tr>
+                        <td>@urun.Kitap.Ad</td>
+                        <td>@urun.Kitap.Yazar</td>
+                        <td>@urun.Kitap.Fiyat</td>
+                        <td>@urun.Adet</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function sepettenKaldir(kitapId, kitapAdi) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: `${kitapAdi} sepetinizden kaldırılacak.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, Kaldır',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Sepet/Kaldir', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ kitapId: kitapId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.basarili) {
+                            location.reload();
+                        } else {
+                            Swal.fire('Hata!', data.mesaj, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function adetGuncelle(kitapId, miktar) {
+            fetch('/Sepet/AdetGuncelle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    kitapId: kitapId,
+                    miktar: miktar
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.basarili) {
+                    location.reload();
+                } else {
+                    Swal.fire('Hata!', data.mesaj, 'error');
+                }
+            });
+        }
+    </script>
+} 

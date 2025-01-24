@@ -1,0 +1,33 @@
+﻿@using KitapKosesi.Models
+@model List<KitapKosesi.Models.Kitap>
+
+<div class="container mt-4">
+    <h2>Kitaplar</h2>
+    <div class="row">
+        @foreach (var kitap in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="@kitap.ResimUrl" class="card-img-top" alt="@kitap.Ad">
+                    <div class="card-body">
+                        <h5 class="card-title">@kitap.Ad</h5>
+                        <p class="card-text">@kitap.Yazar</p>
+                        <p class="card-text">@kitap.Fiyat.ToString("C")</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary favori-ekle"
+                                    data-kitap-id="@kitap.Id">
+                                <i class="fas fa-heart"></i> Favorilere Ekle
+                            </button>
+                            <a href="/Kitap/Detay/@kitap.Id" class="btn btn-sm btn-primary">
+                                Detaylar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

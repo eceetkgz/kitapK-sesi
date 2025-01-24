@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Giriş";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Giriş Yap</h3>
+
+                    @if (TempData["Hata"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Hata"]
+                        </div>
+                    }
+
+                    <form method="post" asp-controller="Home" asp-action="Giris">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sifre" class="form-label">Şifre</label>
+                            <input type="password" class="form-control" id="sifre" name="sifre" required>
+                        </div>
+                        <div class="mb-3">
+                            <a href="/Home/SifreSifirla" class="text-decoration-none">Şifremi Unuttum</a>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Hesabınız yok mu? <a href="/Kayit/KayitOl" class="text-decoration-none">Kayıt Ol</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Sıfırlama Modal -->
+<div class="modal fade" id="sifreSifirlaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Şifre Sıfırlama</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-controller="Giris" asp-action="SifreSifirla" id="sifreSifirlaForm">
+                    <div class="form-group">
+                        <label for="resetEmail">E-posta Adresiniz</label>
+                        <input type="email" class="form-control" id="resetEmail" name="email" required>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Şifre Sıfırlama Bağlantısı Gönder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form başarıyla gönderildikten sonra modalı kapat
+        document.getElementById('sifreSifirlaForm').addEventListener('submit', function() {
+            setTimeout(function() {
+                if (@(TempData["Basarili"] != null ? "true" : "false")) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('sifreSifirlaModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+            }, 100);
+        });
+    </script>
+}

@@ -1,0 +1,42 @@
+@model KitapKosesi.Models.GirisModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Giriş Yap</h2>
+
+            @if (TempData["Mesaj"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Mesaj"]
+                </div>
+            }
+
+            @using (Html.BeginForm("GirisYap", "Kullanici", FormMethod.Post))
+            {
+                <div class="mb-3">
+                    <label asp-for="Eposta" class="form-label">Email</label>
+                    <input asp-for="Eposta" class="form-control" required>
+                    <span asp-validation-for="Eposta" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Sifre" class="form-label">Şifre</label>
+                    <input asp-for="Sifre" type="password" class="form-control" required>
+                    <span asp-validation-for="Sifre" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+            }
+
+            <div class="text-center mt-3">
+                @using (Html.BeginForm("SifreSifirla", "Kullanici", FormMethod.Post))
+                {
+                    <button type="submit" class="btn btn-link">Şifremi Unuttum</button>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

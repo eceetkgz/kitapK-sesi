@@ -1,0 +1,154 @@
+@model List<KitapKosesi.Models.Kitap>
+
+@{
+    ViewData["Title"] = "Favorilerim";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Favorilerim</h2>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Henüz favoriniz bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @foreach (var kitap in Model)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@kitap.ResimUrl" class="card-img-top" alt="@kitap.Ad" style="height: 250px; object-fit: contain;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@kitap.Ad</h5>
+                            <p class="card-text">@kitap.Yazar</p>
+                            <p class="card-text"><small class="text-muted">@kitap.Kategori</small></p>
+                            <div class="mt-2">
+                                <span class="text-primary fw-bold">@kitap.Fiyat.ToString("N2") ₺</span>
+                            </div>
+                            <div class="mt-auto">
+                                <button class="btn btn-danger btn-sm" onclick="favorilerdenKaldir('@kitap.Id', '@kitap.Ad')">
+                                    <i class="bi bi-trash"></i> Favorilerden Kaldır
+                                </button>
+                                @if (kitap.StokMiktari > 0)
+                                {
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" onclick="sepeteEkle('@kitap.Id', '@kitap.Ad')">
+                                        <i class="bi bi-cart-plus"></i> Sepete Ekle
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-sm mt-2 w-100" onclick="stokBildirimEkle('@kitap.Id')">
+                                        <i class="bi bi-bell"></i> Stok Bildirimi
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function favorilerdenKaldir(kitapId, kitapAdi) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: `${kitapAdi} favorilerinizden kaldırılacak.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, Kaldır',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Kitap/FavorilerdenKaldir', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ kitapId: kitapId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Başarılı!',
+                                text: `${kitapAdi} favorilerinizden kaldırıldı.`,
+                                icon: 'success'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Hata!',
+                                text: data.message || 'Bir hata oluştu.',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function sepeteEkle(kitapId, kitapAdi) {
+            fetch('/Sepet/Ekle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ kitapId: kitapId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: `${kitapAdi} sepete eklendi.`,
+                        icon: 'success',
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Hata!',
+                        text: data.message || 'Bir hata oluştu.',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+
+        function stokBildirimEkle(kitapId) {
+            fetch('/Kitap/StokBildirimEkle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ kitapId: kitapId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: 'Stok bildirimi kaydedildi.',
+                        icon: 'success',
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Hata!',
+                        text: data.message || 'Bir hata oluştu.',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+    </script>
+} 

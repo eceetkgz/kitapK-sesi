@@ -1,0 +1,97 @@
+@model List<KitapKosesi.Models.SiparisModel>
+
+@{
+    ViewData["Title"] = "Siparişlerim";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Siparişlerim</h2>
+        <a href="@Url.Action("Index", "Kitap")" class="btn btn-primary">
+            <i class="bi bi-cart-plus"></i> Alışverişe Devam Et
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Henüz siparişiniz bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        foreach (var siparis in Model.OrderByDescending(s => s.SiparisTarihi))
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <strong>Sipariş No:</strong> @siparis.SiparisNo
+                        </div>
+                        <div class="col-md-4 text-md-center">
+                            <strong>Tarih:</strong> @siparis.SiparisTarihi.ToString("dd.MM.yyyy HH:mm")
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-@(siparis.SiparisDurumu == "Tamamlandı" ? "success" : 
+                                               siparis.SiparisDurumu == "İptal" ? "danger" : 
+                                               siparis.SiparisDurumu == "Onay Bekliyor" ? "warning" : 
+                                               "primary")">
+                                @siparis.SiparisDurumu
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="mb-3">Sipariş Edilen Ürünler</h6>
+                            @foreach (var item in siparis.SepetUrunleri)
+                            {
+                                <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+                                    <img src="@item.Kitap.ResimUrl" alt="@item.Kitap.Ad" 
+                                         style="width: 60px; height: 80px; object-fit: contain;" 
+                                         class="me-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">@item.Kitap.Ad</h6>
+                                        <small class="text-muted">
+                                            @item.Adet adet x @item.Kitap.Fiyat.ToString("N2") ₺
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <strong>@((item.Adet * item.Kitap.Fiyat).ToString("N2")) ₺</strong>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-4 border-start">
+                            <h6 class="mb-3">Teslimat Bilgileri</h6>
+                            <div class="mb-3">
+                                <strong>Alıcı:</strong><br>
+                                @siparis.Ad @siparis.Soyad
+                            </div>
+                            <div class="mb-3">
+                                <strong>Adres:</strong><br>
+                                @siparis.Adres<br>
+                                @siparis.Il / @siparis.Ilce
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Ara Toplam:</span>
+                                <strong>@siparis.AraToplam.ToString("N2") ₺</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Kargo:</span>
+                                <strong>@siparis.KargoUcreti.ToString("N2") ₺</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Toplam:</span>
+                                <strong class="text-primary">@siparis.ToplamTutar.ToString("N2") ₺</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div> 

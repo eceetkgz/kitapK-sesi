@@ -1,0 +1,185 @@
+@model List<KitapKosesi.Models.SiparisModel>
+
+@{
+    ViewData["Title"] = "Sipariş Yönetimi";
+}
+
+<div class="container mt-4">
+    <h2>Sipariş Yönetimi</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sipariş No</th>
+                    <th>Müşteri</th>
+                    <th>Tarih</th>
+                    <th>Tutar</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var siparis in Model)
+                {
+                    <tr>
+                        <td>@siparis.SiparisNo</td>
+                        <td>@siparis.Ad @siparis.Soyad</td>
+                        <td>@siparis.SiparisTarihi.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@siparis.ToplamTutar.ToString("N2") ₺</td>
+                        <td>
+                            <span class="badge bg-@(SiparisDurumuRengiAl(siparis.SiparisDurumu))">
+                                @siparis.SiparisDurumu
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" 
+                                        data-bs-toggle="dropdown">
+                                    Durum Güncelle
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" 
+                                        onclick="siparisDurumuGuncelle('@siparis.SiparisNo', 'Onaylandı')">Onayla</a></li>
+                                    <li><a class="dropdown-item" href="#" 
+                                        onclick="siparisDurumuGuncelle('@siparis.SiparisNo', 'Hazırlanıyor')">Hazırlanıyor</a></li>
+                                    <li><a class="dropdown-item" href="#" 
+                                        onclick="siparisDurumuGuncelle('@siparis.SiparisNo', 'Kargoya Verildi')">Kargoya Ver</a></li>
+                                    <li><a class="dropdown-item" href="#" 
+                                        onclick="siparisDurumuGuncelle('@siparis.SiparisNo', 'Tamamlandı')">Tamamlandı</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" 
+                                        onclick="siparisDurumuGuncelle('@siparis.SiparisNo', 'İptal Edildi')">İptal Et</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Stok Güncelleme Modalı -->
+<div class="modal fade" id="stokGuncellemeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Stok Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stokGuncellemeFormu">
+                    <input type="hidden" id="kitapId" name="kitapId">
+                    <div class="mb-3">
+                        <label class="form-label">Yeni Stok Miktarı</label>
+                        <input type="number" class="form-control" name="yeniStok" min="0" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="stokGuncelle()">Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function siparisDurumuGuncelle(siparisNo, yeniDurum) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: `Sipariş durumu "${yeniDurum}" olarak güncellenecek.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, Güncelle',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Yonetici/SiparisDurumuGuncelle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `siparisNo=${siparisNo}&yeniDurum=${yeniDurum}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.basarili) {
+                            Swal.fire({
+                                title: 'Başarılı!',
+                                text: 'Sipariş durumu güncellendi',
+                                icon: 'success'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Hata!',
+                                text: 'Sipariş durumu güncellenirken bir hata oluştu',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function stokGuncelle() {
+            var kitapId = document.getElementById('kitapId').value;
+            var yeniStok = document.querySelector('input[name="yeniStok"]').value;
+
+            fetch('/Yonetici/StokGuncelle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `kitapId=${kitapId}&yeniStok=${yeniStok}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('stokGuncellemeModal'));
+                modal.hide();
+
+                if (data.basarili) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Başarılı!',
+                        text: 'Stok güncellendi ve bildirimler gönderildi'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: 'Stok güncellenirken bir hata oluştu'
+                    });
+                }
+            });
+        }
+
+        function stokGuncellemeModalAc(kitapId) {
+            document.getElementById('kitapId').value = kitapId;
+            var modal = new bootstrap.Modal(document.getElementById('stokGuncellemeModal'));
+            modal.show();
+        }
+    </script>
+}
+
+@functions {
+    string SiparisDurumuRengiAl(string durum)
+    {
+        return durum switch
+        {
+            "Onay Bekliyor" => "warning",
+            "Onaylandı" => "info",
+            "Hazırlanıyor" => "primary",
+            "Kargoya Verildi" => "success",
+            "Tamamlandı" => "success",
+            "İptal Edildi" => "danger",
+            _ => "secondary"
+        };
+    }
+} 

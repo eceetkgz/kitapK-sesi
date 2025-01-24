@@ -1,0 +1,97 @@
+body {
+    font-family: Retosta, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f4f0;
+    color: #4d4d4d;
+}
+
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #d2b48c;
+    padding: 10px 20px;
+}
+
+    .navbar .logo {
+        display: flex;
+        align-items: center;
+    }
+
+        .navbar .logo img {
+            width: 60px;
+            height: auto;
+            margin-right: 20px;
+        }
+
+        .navbar .logo span {
+            font-size: 30px;
+            font-weight: bold;
+            color: #4d4d4d;
+        }
+
+    .navbar .buttons .btn {
+        text-decoration: none;
+        margin-left: 10px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #4d4d4d;
+        border: 1px solid #d2b48c;
+        transition: background-color 0.3s ease;
+    }
+
+        .navbar .buttons .btn:hover {
+            background-color: #c4a484;
+            color: #fff;
+        }
+
+        .navbar .buttons .btn.admin {
+            background-color: #e1c699;
+            border: 1px solid #c4a484;
+        }
+
+
+.welcome {
+    text-align: center;
+    margin-top: 50px;
+}
+
+    .welcome h1 {
+        font-size: 36px;
+        color: #4d4d4d;
+    }
+
+    .welcome p {
+        font-size: 18px;
+        color: #6c6c6c;
+    }
+
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #d2b48c;
+    color: #4d4d4d;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.favori-ekle.active i {
+    color: red;
+}
+
+.sepet-ekle:hover, .favori-ekle:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.butonlar button {
+    border: none;
+    background: transparent;
+    padding: 5px 10px;
+    margin: 0 5px;
+}
