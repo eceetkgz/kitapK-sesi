@@ -180,12 +180,19 @@ namespace KitapKosesi.Services
             }
         }
 
+
         public async Task<List<Kitap>> KitaplariGetir()
         {
             try
             {
                 var kitaplarRef = _firestoreDb.Collection("kitaplar");
                 var snapshot = await kitaplarRef.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count == 0)
+                {
+                    return new List<Kitap>(); // Eğer belge yoksa boş liste döndür
+                }
+
                 var kitaplar = new List<Kitap>();
 
                 foreach (var doc in snapshot.Documents)
@@ -199,7 +206,7 @@ namespace KitapKosesi.Services
                             Ad = data["kitapAdi"]?.ToString(),
                             Yazar = data["yazar"]?.ToString(),
                             Kategori = data["kategori"]?.ToString(),
-                            StokMiktari = Convert.ToInt32(data["stokAdedi"]),
+                            StokMiktari = data.ContainsKey("stokAdedi") ? Convert.ToInt32(data["stokAdedi"]) : 0,
                             Tur = data["tur"]?.ToString(),
                             YayinYili = data["yayinYili"]?.ToString(),
                             ResimUrl = data["resimUrl"]?.ToString(),
@@ -222,7 +229,7 @@ namespace KitapKosesi.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Kitapları getirirken hata oluştu: {ex.Message}");
-                throw;
+                throw; // Hatanın üst katmana iletilmesini sağla
             }
         }
 

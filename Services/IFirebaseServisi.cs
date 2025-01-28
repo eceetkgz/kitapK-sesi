@@ -30,7 +30,6 @@ namespace KitapKosesi.Services
         Task<List<SiparisModel>> TumSiparisleriGetir();
         Task<bool> SiparisDurumuGuncelle(string siparisId, string yeniDurum);
         Task<bool> SepetiTemizle(string kullaniciId);
-        Task<bool> FavoriyeEkle(string kullaniciId, string kitapId);
 
     }
 }

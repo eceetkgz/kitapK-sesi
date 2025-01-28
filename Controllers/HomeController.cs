@@ -19,17 +19,11 @@ namespace KitapKosesi.Controllers
             _firebaseServisi = firebaseServisi;
         }
 
-        // Anasayfa
+   
         public async Task<IActionResult> Index()
         {
-            var kullaniciId = HttpContext.Session.GetString("UserId");
-            if (!string.IsNullOrEmpty(kullaniciId))
-            {
-                ViewBag.Favoriler = await _firebaseServisi.FavorileriGetir(kullaniciId);
-            }
-            
-            var kitaplar = await _firebaseServisi.KitaplariGetir();
-            return View(kitaplar);
+            var kitaplar = await _firebaseServisi.KitaplariGetir(); // Firebase'den kitapları al
+            return View(kitaplar); // Kitapları view'a gönder
         }
 
         // Kayıt sayfasına yönlendirme
